@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "rails_helper"
+require "sequel"
 
 describe Tidewave::Tools::ExecuteSqlQuery do
   describe ".tool_name" do
@@ -56,6 +56,15 @@ describe Tidewave::Tools::ExecuteSqlQuery do
   end
 
   describe "#call" do
+    let(:db) { Sequel.sqlite }
+
+    before do
+      Tidewave.reset_config!
+      Tidewave.config.preferred_orm = :sequel
+      Tidewave::DatabaseAdapter.reset!
+      allow(::Sequel::Model).to receive(:db).and_return(db)
+    end
+
     context "with a simple query without arguments" do
       let(:query) { "SELECT 1 as id, 'test' as name" }
 
@@ -66,8 +75,7 @@ describe Tidewave::Tools::ExecuteSqlQuery do
           columns: [ "id", "name" ],
           rows: [ [ 1, "test" ] ],
           row_count: 1,
-          adapter: "SQLite",
-          database: ":memory:"
+          adapter: "SQLITE"
         )
       end
     end
@@ -87,11 +95,8 @@ describe Tidewave::Tools::ExecuteSqlQuery do
       it "returns all rows" do
         response = described_class.new.call(query: query)
 
-        expect(response).to include(
-          columns: [ "id", "name" ],
-          row_count: 5,
-          adapter: "SQLite"
-        )
+        expect(response[:columns]).to eq([ "id", "name" ])
+        expect(response[:row_count]).to eq(5)
         expect(response[:rows]).to eq([
           [ 1, "User 1" ],
           [ 2, "User 2" ],
@@ -120,8 +125,8 @@ describe Tidewave::Tools::ExecuteSqlQuery do
     context "when the query execution fails" do
       let(:query) { "INVALID SQL SYNTAX" }
 
-      it "raises an error" do
-        expect { described_class.new.call(query: query) }.to raise_error(ActiveRecord::StatementInvalid)
+      it "raises a Sequel error" do
+        expect { described_class.new.call(query: query) }.to raise_error(Sequel::DatabaseError)
       end
     end
 

@@ -2,8 +2,6 @@
 
 # rubocop:disable Layout/LeadingCommentSpace
 
-require "active_support/core_ext/object/blank"
-
 describe Tidewave::Tools::GetDocs do
   describe "#call" do
     subject { described_class.new.call(reference: reference) }
@@ -137,12 +135,5 @@ describe Tidewave::Tools::GetDocs do
       end
     end
 
-    context "when getting docs for Rails/ActiveSupport methods" do
-      let(:reference) { 'String#presence' }
-
-      it "returns documentation for ActiveSupport extensions" do
-        expect(subject).to match("presence")
-      end
-    end
   end
 end

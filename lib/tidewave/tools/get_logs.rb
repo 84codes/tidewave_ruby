@@ -14,8 +14,8 @@ class Tidewave::Tools::GetLogs < Tidewave::Tools::Base
   end
 
   def call(tail:, grep: nil)
-    log_file = Rails.root.join("log", "#{Rails.env}.log")
-    return "Log file not found" unless File.exist?(log_file)
+    log_file = log_file_path
+    return "Log file not found" unless log_file && File.exist?(log_file)
 
     regex = Regexp.new(grep, Regexp::IGNORECASE) if grep
     matching_lines = []
@@ -31,6 +31,17 @@ class Tidewave::Tools::GetLogs < Tidewave::Tools::Base
   end
 
   private
+
+  def log_file_path
+    config = Tidewave.config
+    return config.log_path if config.log_path
+
+    root = config.root
+    return nil unless root
+
+    env = config.environment || ENV["RACK_ENV"] || "development"
+    root.join("log", "#{env}.log")
+  end
 
   def tail_lines(file_path)
     File.open(file_path, "rb") do |file|

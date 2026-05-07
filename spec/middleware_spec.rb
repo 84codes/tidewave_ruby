@@ -83,7 +83,7 @@ RSpec.describe Tidewave::Middleware do
         expect(last_response.status).to eq(403)
         expect(last_response.headers["Content-Type"]).to eq("text/plain")
         expect(last_response.body).to include("For security reasons, Tidewave does not accept remote connections by default")
-        expect(last_response.body).to include("config.tidewave.allow_remote_access = true")
+        expect(last_response.body).to include("config.allow_remote_access = true")
       end
     end
   end

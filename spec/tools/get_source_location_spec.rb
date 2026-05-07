@@ -108,7 +108,7 @@ describe Tidewave::Tools::GetSourceLocation do
       let(:reference) { 'TidewaveTestModule.unknown' }
 
       it "raises" do
-        expect { subject }.to raise_error(NameError, "undefined method `unknown' for class `#<Class:TidewaveTestModule>'")
+        expect { subject }.to raise_error(NameError, /undefined method ['`]unknown['`] for class ['`]#<Class:TidewaveTestModule>['`]/)
       end
     end
 
@@ -124,7 +124,7 @@ describe Tidewave::Tools::GetSourceLocation do
       let(:reference) { 'TidewaveTestModule#unknown' }
 
       it "raises" do
-        expect { subject }.to raise_error(NameError, "undefined method `unknown' for class `TidewaveTestModule'")
+        expect { subject }.to raise_error(NameError, /undefined method ['`]unknown['`] for class ['`]TidewaveTestModule['`]/)
       end
     end
 

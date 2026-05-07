@@ -5,8 +5,7 @@ RSpec.describe Tidewave do
     expect(Tidewave::VERSION).not_to be nil
   end
 
-  it "injects Rails configuration" do
-    config = Rails.configuration.tidewave
-    expect(config).to be_a(Tidewave::Configuration)
+  it "exposes a Configuration instance via .config" do
+    expect(Tidewave.config).to be_a(Tidewave::Configuration)
   end
 end

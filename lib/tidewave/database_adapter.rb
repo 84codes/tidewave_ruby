@@ -7,12 +7,13 @@ module Tidewave
         @current ||= create_adapter
       end
 
+      def reset!
+        @current = nil
+      end
+
       def create_adapter
-        orm_type = Rails.application.config.tidewave.preferred_orm
+        orm_type = Tidewave.config.preferred_orm
         case orm_type
-        when :active_record
-          require_relative "database_adapters/active_record"
-          DatabaseAdapters::ActiveRecord.new
         when :sequel
           require_relative "database_adapters/sequel"
           DatabaseAdapters::Sequel.new

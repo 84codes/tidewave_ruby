@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "rails_helper"
 require "sequel"
 require "tidewave/database_adapters/sequel"
 
@@ -131,19 +130,17 @@ describe Tidewave::DatabaseAdapters::Sequel do
   end
 
   describe "#get_models" do
-    it "filters out anonymous Sequel models" do
-      # Mock Sequel models including anonymous ones
-      account_model = double("Account", name: "Account")
-      user_model = double("User", name: "User")
-      anonymous_model1 = double("AnonymousModel1", name: "Sequel::_Model(:accounts)")
-      anonymous_model2 = double("AnonymousModel2", name: "Sequel::_Model(:users)")
+    def stub_subclasses(klass, subs)
+      allow(klass).to receive(:subclasses).and_return(subs)
+    end
 
-      allow(::Sequel::Model).to receive(:descendants).and_return([
-        account_model,
-        user_model,
-        anonymous_model1,
-        anonymous_model2
-      ])
+    it "filters out anonymous Sequel models" do
+      account_model     = double("Account", name: "Account", subclasses: [])
+      user_model        = double("User", name: "User", subclasses: [])
+      anonymous_model1  = double("AnonymousModel1", name: "Sequel::_Model(:accounts)", subclasses: [])
+      anonymous_model2  = double("AnonymousModel2", name: "Sequel::_Model(:users)", subclasses: [])
+
+      stub_subclasses(::Sequel::Model, [ account_model, user_model, anonymous_model1, anonymous_model2 ])
 
       result = adapter.get_models
 
@@ -152,17 +149,15 @@ describe Tidewave::DatabaseAdapters::Sequel do
     end
 
     it "handles models with nil names gracefully" do
-      named_model = double("NamedModel", name: "Account")
-      nil_name_model = double("NilNameModel", name: nil)
+      named_model    = double("NamedModel", name: "Account", subclasses: [])
+      nil_name_model = double("NilNameModel", name: nil, subclasses: [])
 
-      allow(::Sequel::Model).to receive(:descendants).and_return([
-        named_model,
-        nil_name_model
-      ])
+      stub_subclasses(::Sequel::Model, [ named_model, nil_name_model ])
 
       result = adapter.get_models
 
-      expect(result).to include(named_model, nil_name_model)
+      expect(result).to include(named_model)
+      expect(result).not_to include(nil_name_model)
     end
   end
 end

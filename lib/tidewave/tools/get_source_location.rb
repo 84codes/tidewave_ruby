@@ -32,7 +32,7 @@ class Tidewave::Tools::GetSourceLocation < Tidewave::Tools::Base
 
     if file_path
       begin
-        relative_path = Pathname.new(file_path).relative_path_from(Rails.root)
+        relative_path = Pathname.new(file_path).relative_path_from(Tidewave.config.root)
         "#{relative_path}:#{line_number}"
       rescue ArgumentError
         # If the path cannot be made relative, return the absolute path

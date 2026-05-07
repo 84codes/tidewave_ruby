@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'rails'
-
 describe Tidewave::Tools::GetLogs do
   describe ".tool_name" do
     it "returns the correct tool name" do
@@ -14,7 +12,8 @@ describe Tidewave::Tools::GetLogs do
     let(:log_file_content) { File.read(log_file_path) }
 
     before do
-      allow(Rails).to receive_message_chain(:root, :join).and_return(Pathname.new(log_file_path))
+      Tidewave.reset_config!
+      Tidewave.config.log_path = Pathname.new(log_file_path)
     end
 
     context "without grep filter" do
@@ -62,7 +61,7 @@ describe Tidewave::Tools::GetLogs do
 
     context "when log file doesn't exist" do
       before do
-        allow(Rails).to receive_message_chain(:root, :join).and_return(Pathname.new("nonexistent.log"))
+        Tidewave.config.log_path = Pathname.new("nonexistent.log")
       end
 
       it "returns appropriate message" do

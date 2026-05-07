@@ -19,7 +19,6 @@ module Tidewave
         rows = result.all
         columns = rows.first&.keys || []
 
-        # Format the result similar to ActiveRecord
         {
           columns: columns.map(&:to_s),
           rows: rows.first(RESULT_LIMIT).map(&:values),
@@ -30,8 +29,24 @@ module Tidewave
       end
 
       def get_models
-        # Filter out anonymous Sequel models that can't be resolved as constants
-        ::Sequel::Model.descendants.reject { |model| model.name&.start_with?("Sequel::_Model(") }
+        all_descendants(::Sequel::Model).reject do |model|
+          model.name.nil? || model.name.start_with?("Sequel::_Model(")
+        end
+      end
+
+      private
+
+      def all_descendants(klass)
+        result = []
+        stack = klass.respond_to?(:subclasses) ? klass.subclasses.dup : []
+        until stack.empty?
+          current = stack.pop
+          next if result.include?(current)
+
+          result << current
+          stack.concat(current.subclasses) if current.respond_to?(:subclasses)
+        end
+        result
       end
     end
   end

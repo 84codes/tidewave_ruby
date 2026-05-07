@@ -7,8 +7,7 @@ class Tidewave::Tools::GetModels < Tidewave::Tools::Base
   DESCRIPTION
 
   def call
-    # Ensure all models are loaded
-    Rails.application.eager_load!
+    eager_load!
 
     # Use adapter to get models (encapsulates ORM-specific logic)
     models = Tidewave::DatabaseAdapter.current.get_models
@@ -24,13 +23,19 @@ class Tidewave::Tools::GetModels < Tidewave::Tools::Base
 
   private
 
+  def eager_load!
+    callback = Tidewave.config.eager_load_callback
+    callback.call if callback.respond_to?(:call)
+  end
+
   def get_relative_source_location(model_name)
     source_location = Object.const_source_location(model_name)
-    return nil if source_location.blank?
+    return nil if source_location.nil? || source_location.empty?
 
     file_path, line_number = source_location
+    root = Tidewave.config.root
     begin
-      relative_path = Pathname.new(file_path).relative_path_from(Rails.root)
+      relative_path = Pathname.new(file_path).relative_path_from(root)
       "#{relative_path}:#{line_number}"
     rescue ArgumentError
       # If the path cannot be made relative, return the absolute path
