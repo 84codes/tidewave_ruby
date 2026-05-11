@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "bundler/setup"
-require "pry"
+require "debug"
 require "fast_mcp"
 require "tidewave"
 require "tidewave/middleware"
