@@ -8,6 +8,7 @@ require "erb"
 require "logger"
 require "fileutils"
 require "tidewave"
+require_relative "rails_shim"
 require_relative "streamable_http_transport"
 
 # Tools register themselves as descendants of Tidewave::Tools::Base, so we
@@ -29,6 +30,7 @@ class Tidewave::Middleware
   INVALID_ORIGIN = "For security reasons, Tidewave does not accept requests with an origin header for this endpoint.".freeze
 
   def initialize(app, config = nil)
+    Tidewave::RailsShim.install!
     @config = config || Tidewave.config
     @allow_remote_access = @config.allow_remote_access
     @client_url = @config.client_url
